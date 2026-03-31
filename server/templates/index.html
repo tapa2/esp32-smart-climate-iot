@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Microclimate Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Моніторинг мікроклімату</h1>
+        <p style="color: #95a5a6;">Останнє оновлення: <span id="last-update">--:--:--</span></p>
+        <div class="stats">
+            <div class="card">
+                <h3>CO2 Level</h3><span id="co2-val" class="value">--</span> ppm
+            </div>
+            <div class="card" style="border-color: #d0ff00;">
+                <h3>Temperature</h3><span id="temp-val" class="value">--</span> °C
+            </div>
+            <div class="card" style="border-color: #2eaccc;">
+                <h3>Humidity</h3><span id="hum-val" class="value">--</span> %
+            </div>
+        </div>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
