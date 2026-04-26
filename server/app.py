@@ -23,7 +23,6 @@ def get_data():
 
 @app.route('/dashboard')
 def dashboard():
-    # Flask автоматично шукає в папці templates/
     return render_template('index.html')
 
 if __name__ == '__main__':
