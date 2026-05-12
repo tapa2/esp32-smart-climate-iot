@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система моніторингу мікроклімату</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">🌿 ClimateControl</div>
+            
+            <!-- Кнопка Бургер-меню для мобільних -->
+            <button class="burger-menu" id="burger-btn">
+                <span></span><span></span><span></span>
+            </button>
+
+            <!-- Навігація -->
+            <nav class="main-nav" id="main-nav">
+                <a href="/dashboard">Дашборд</a>
+                <a href="/statistics">Статистика</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container text-center">
+            <p>© 2026 Система моніторингу мікроклімату | Розроблено для курсового проєкту</p>
+        </div>
+    </footer>
+
+    <!-- Скрипт для роботи Бургер-меню -->
+    <script>
+        document.getElementById('burger-btn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.getElementById('main-nav').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

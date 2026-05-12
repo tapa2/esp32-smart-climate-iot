@@ -1,31 +1,116 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-    <title>Microclimate Monitor</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-<body>
-    <div class="container">
-        <h1>Моніторинг мікроклімату</h1>
-        <p style="color: #95a5a6;">Останнє оновлення: <span id="last-update">--:--:--</span></p>
-        <div class="stats">
-            <div class="card">
-                <h3>CO2 Level</h3><span id="co2-val" class="value">--</span> ppm
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Ліва колонка: Картки та Графік -->
+    <div class="dashboard-main-area">
+        <div class="cards-wrapper">
+            <div class="data-card co2-card">
+                <div class="card-title">Рівень CO2</div>
+                <div class="card-value"><span id="co2-val">--</span> <span class="unit">ppm</span></div>
             </div>
-            <div class="card" style="border-color: #d0ff00;">
-                <h3>Temperature</h3><span id="temp-val" class="value">--</span> °C
+            <div class="data-card temp-card">
+                <div class="card-title">Температура</div>
+                <div class="card-value"><span id="temp-val">--</span> <span class="unit">°C</span></div>
             </div>
-            <div class="card" style="border-color: #2eaccc;">
-                <h3>Humidity</h3><span id="hum-val" class="value">--</span> %
+            <div class="data-card hum-card">
+                <div class="card-title">Вологість</div>
+                <div class="card-value"><span id="hum-val">--</span> <span class="unit">%</span></div>
             </div>
         </div>
-        <canvas id="myChart"></canvas>
+
+        <div class="chart-container box-shadow">
+            <h2 class="section-title">Динаміка показників</h2>
+            <div class="canvas-wrapper">
+                <canvas id="realtimeChart"></canvas>
+            </div>
+        </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</body>
+    <!-- Права колонка: Панель статусу та Налаштувань -->
+    <aside class="dashboard-sidebar">
+        <!-- Блок статусу -->
+        <div class="status-panel box-shadow mb-2">
+            <h2 class="section-title">Статус системи</h2>
+            <div id="status-indicator" class="status-box">
+                Очікування даних...
+            </div>
+            <div class="update-meta">
+                Оновлено: <span id="last-update">--:--:--</span>
+            </div>
+        </div>
 
-</html>
+        <!-- Дропдаун Налаштувань -->
+        <div class="settings-panel box-shadow">
+            <div class="settings-header" id="settings-toggle">
+                <h2 class="section-title" style="margin: 0; font-size: 1.1rem;">⚙️ Зона комфорту</h2>
+                <span id="settings-arrow" class="dropdown-arrow">▼</span>
+            </div>
+            
+            <div class="settings-content" id="settings-content" style="display: none;">
+                <div class="setting-group mt-2">
+                    <label class="toggle-label"><input type="checkbox" id="check-co2"> CO2 (макс):</label>
+                    <div class="range-inputs"><input type="number" id="max-co2" class="form-control-sm"></div>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="toggle-label"><input type="checkbox" id="check-temp"> Температура:</label>
+                    <div class="range-inputs">
+                        <input type="number" id="min-temp" class="form-control-sm" placeholder="Від">
+                        <span>-</span>
+                        <input type="number" id="max-temp" class="form-control-sm" placeholder="До">
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <label class="toggle-label"><input type="checkbox" id="check-hum"> Вологість:</label>
+                    <div class="range-inputs">
+                        <input type="number" id="min-hum" class="form-control-sm" placeholder="Від">
+                        <span>-</span>
+                        <input type="number" id="max-hum" class="form-control-sm" placeholder="До">
+                    </div>
+                </div>
+                
+                <button id="save-settings-btn" class="btn-primary mt-2">Зберегти налаштування</button>
+                <button id="reset-settings-btn" class="btn-text">Відновити рекомендовані</button>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- Модальне вікно (Попап) -->
+<div id="setup-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="section-title text-center">🌿 Вітаємо в ClimateControl!</h2>
+        <p class="modal-text text-center">Це ваш перший вхід. Ваш часовий пояс визначено як:</p>
+        <div class="timezone-badge text-center mb-2"><span id="detected-timezone">Визначаємо...</span></div>
+        
+        <p class="modal-text">Встановіть базові межі комфорту (їх завжди можна змінити у меню справа):</p>
+        
+        <div class="modal-quick-settings">
+            <div class="input-group mb-2">
+                <label>Максимальний CO2 (ppm):</label>
+                <input type="number" id="modal-co2" value="1000" class="form-control">
+            </div>
+            <div class="input-group mb-2">
+                <label>Комфортна температура (°C):</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="modal-temp-min" value="18" class="form-control" placeholder="Мін">
+                    <input type="number" id="modal-temp-max" value="24" class="form-control" placeholder="Макс">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Комфортна вологість (%):</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="modal-hum-min" value="40" class="form-control" placeholder="Мін">
+                    <input type="number" id="modal-hum-max" value="60" class="form-control" placeholder="Макс">
+                </div>
+            </div>
+        </div>
+
+        <button id="modal-save-btn" class="btn-primary mt-2" style="width: 100%;">Зберегти та почати</button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

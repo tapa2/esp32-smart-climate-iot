@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="statistics-wrapper">
+    <div class="controls-panel box-shadow">
+        <h2 class="section-title">Аналіз архівних даних</h2>
+        <div class="filter-controls">
+            <div class="input-group">
+                <label for="date-picker">Оберіть дату:</label>
+                <input type="date" id="date-picker" class="form-control">
+            </div>
+            <div class="input-group">
+                <label for="param-picker">Параметр:</label>
+                <select id="param-picker" class="form-control">
+                    <option value="co2">Рівень CO2</option>
+                    <option value="temp">Температура</option>
+                    <option value="hum">Вологість</option>
+                </select>
+            </div>
+            <button id="load-history-btn" class="btn-primary">Завантажити графік</button>
+        </div>
+    </div>
+
+    <div class="chart-container box-shadow mt-2">
+        <h2 id="history-chart-title" class="section-title text-center">Графік за обраний період</h2>
+        <canvas id="historyChart"></canvas>
+    </div>
+</div>
+
+<!-- Підключення JS тільки для цієї сторінки -->
+<script src="{{ url_for('static', filename='js/stats.js') }}"></script>
+{% endblock %}

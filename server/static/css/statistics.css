@@ -1,0 +1,14 @@
+/* ================= СТОРІНКА СТАТИСТИКИ ================= */
+.statistics-wrapper { display: flex; flex-direction: column; gap: 20px; }
+
+.controls-panel { margin-bottom: 20px; }
+
+.filter-controls { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+
+.input-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; }
+.input-group label { margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); }
+
+.filter-controls .btn-primary { width: auto; height: 42px; }
+
+/* Фікс розміру графіка аналітики */
+#historyChart { max-height: 400px; }

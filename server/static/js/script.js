@@ -15,29 +15,26 @@ const chart = new Chart(ctx, {
     },
     options: { responsive: true, scales: { y: { beginAtZero: false } } }
 });
-
 async function updateDashboard() {
     try {
         const res = await fetch('/data');
-        const data = await res.json();
+        const data = await res.json(); // Тепер це масив [{}, {}, ...]
 
-        console.log("Отримані дані для графіка:", data);
+        if (data.length > 0) {
+            const latest = data[data.length - 1];
+            
+            document.getElementById('co2-val').innerText = latest.co2;
+            document.getElementById('temp-val').innerText = latest.temp;
+            document.getElementById('hum-val').innerText = latest.hum;
+            document.getElementById('last-update').innerText = latest.timestamp;
 
-        document.getElementById('co2-val').innerText = data.co2;
-        document.getElementById('temp-val').innerText = data.temp;
-        document.getElementById('hum-val').innerText = data.hum;
-        document.getElementById('last-update').innerText = new Date().toLocaleTimeString();
-
-        const now = new Date().toLocaleTimeString();
-        chart.data.labels.push(now);
-        chart.data.datasets[0].data.push(data.co2);
-        
-        if (chart.data.labels.length > 15) {
-            chart.data.labels.shift();
-            chart.data.datasets[0].data.shift();
+            chart.data.labels = data.map(entry => entry.timestamp.split(' ')[1]); // Тільки час
+            chart.data.datasets[0].data = data.map(entry => entry.co2);
+            chart.update();
         }
-        chart.update('none'); // Оновлюємо без зайвої анімації для швидкості
-    } catch (e) { console.error("Fetch error:", e); }
+    } catch (e) {
+        console.error("Fetch error:", e);
+    }
 }
 
 setInterval(updateDashboard, 3000);
