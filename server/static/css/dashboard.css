@@ -25,7 +25,7 @@
 }
 .update-meta { font-size: 0.85rem; color: var(--text-muted); text-align: right; }
 
-/* ================= ДРОПДАУН НАЛАШТУВАНЬ (АКОРДЕОН) ================= */
+/* ================= ДРОПДАУН НАЛАШТУВАНЬ  ================= */
 .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-bottom: 5px; }
 .dropdown-arrow { font-size: 0.9rem; transition: transform 0.3s; color: var(--text-muted); }
 .settings-content { overflow: hidden; }

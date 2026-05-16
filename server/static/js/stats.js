@@ -4,7 +4,6 @@ class StatisticsManager {
         this.initChart();
         this.setupDatePicker();
         this.bindEvents();
-        // Прибираємо this.loadData() звідси, бо Flatpickr завантажить її сам після ініціалізації
     }
 
     setupDatePicker() {

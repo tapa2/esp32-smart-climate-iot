@@ -18,7 +18,7 @@ const chart = new Chart(ctx, {
 async function updateDashboard() {
     try {
         const res = await fetch('/data');
-        const data = await res.json(); // Тепер це масив [{}, {}, ...]
+        const data = await res.json(); 
 
         if (data.length > 0) {
             const latest = data[data.length - 1];

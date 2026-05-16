@@ -26,7 +26,6 @@ class DashboardManager {
         return dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 
-    // НОВА ФУНКЦІЯ: Перевірка логіки (мін не може бути більше макс, а також перевірка адекватності)
     validateSettings(co2Max, tMin, tMax, hMin, hMax) {
         if (tMin > tMax) { alert("Помилка: Мінімальна температура не може бути більшою за максимальну!"); return false; }
         if (tMin < -5 || tMax > 50) { alert("Помилка: Допустима температура від -5 до 50 °C!"); return false; }
