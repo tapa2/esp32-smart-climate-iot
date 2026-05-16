@@ -26,25 +26,43 @@ class DashboardManager {
         return dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 
+    // НОВА ФУНКЦІЯ: Перевірка логіки (мін не може бути більше макс, а також перевірка адекватності)
+    validateSettings(co2Max, tMin, tMax, hMin, hMax) {
+        if (tMin > tMax) { alert("Помилка: Мінімальна температура не може бути більшою за максимальну!"); return false; }
+        if (tMin < -5 || tMax > 50) { alert("Помилка: Допустима температура від -5 до 50 °C!"); return false; }
+        
+        if (hMin > hMax) { alert("Помилка: Мінімальна вологість не може бути більшою за максимальну!"); return false; }
+        if (hMin < 0 || hMax > 100) { alert("Помилка: Вологість має бути в межах 0 - 100%!"); return false; }
+        
+        if (co2Max < 400 || co2Max > 5000) { alert("Помилка: Адекватний рівень CO2 знаходиться в межах 400 - 5000 ppm!"); return false; }
+        
+        return true;
+    }
+
     checkFirstSetup() {
         const isSetupDone = localStorage.getItem('climateSetupComplete');
         
         if (!isSetupDone) {
             const modal = document.getElementById('setup-modal');
             const tzDisplay = document.getElementById('detected-timezone');
-            
-            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            tzDisplay.innerText = userTimeZone;
-            
+            tzDisplay.innerText = Intl.DateTimeFormat().resolvedOptions().timeZone;
             modal.classList.add('active');
 
             document.getElementById('modal-save-btn').addEventListener('click', () => {
-                // Зберігаємо всі 3 показники з попапу
-                this.userSettings.co2.max = parseInt(document.getElementById('modal-co2').value);
-                this.userSettings.temp.min = parseInt(document.getElementById('modal-temp-min').value);
-                this.userSettings.temp.max = parseInt(document.getElementById('modal-temp-max').value);
-                this.userSettings.hum.min = parseInt(document.getElementById('modal-hum-min').value);
-                this.userSettings.hum.max = parseInt(document.getElementById('modal-hum-max').value);
+                const cMax = parseInt(document.getElementById('modal-co2').value);
+                const tMin = parseInt(document.getElementById('modal-temp-min').value);
+                const tMax = parseInt(document.getElementById('modal-temp-max').value);
+                const hMin = parseInt(document.getElementById('modal-hum-min').value);
+                const hMax = parseInt(document.getElementById('modal-hum-max').value);
+                
+                // Якщо перевірка не пройдена - зупиняємо збереження
+                if (!this.validateSettings(cMax, tMin, tMax, hMin, hMax)) return;
+
+                this.userSettings.co2.max = cMax;
+                this.userSettings.temp.min = tMin;
+                this.userSettings.temp.max = tMax;
+                this.userSettings.hum.min = hMin;
+                this.userSettings.hum.max = hMax;
                 
                 localStorage.setItem('climateSettingsAdvanced', JSON.stringify(this.userSettings));
                 localStorage.setItem('climateSetupComplete', 'true');
@@ -58,9 +76,7 @@ class DashboardManager {
 
     loadSettings() {
         const saved = localStorage.getItem('climateSettingsAdvanced');
-        if (saved) {
-            this.userSettings = JSON.parse(saved);
-        }
+        if (saved) this.userSettings = JSON.parse(saved);
         this.updateInputsFromSettings();
     }
 
@@ -78,38 +94,42 @@ class DashboardManager {
     }
 
     bindEvents() {
-        // Логіка дропдауну (Акордеону) для налаштувань
         document.getElementById('settings-toggle').addEventListener('click', () => {
             const content = document.getElementById('settings-content');
             const arrow = document.getElementById('settings-arrow');
             if (content.style.display === 'none') {
-                content.style.display = 'block';
-                arrow.innerText = '▲';
+                content.style.display = 'block'; arrow.innerText = '▲';
             } else {
-                content.style.display = 'none';
-                arrow.innerText = '▼';
+                content.style.display = 'none'; arrow.innerText = '▼';
             }
         });
 
-        // Збереження з бокової панелі
         document.getElementById('save-settings-btn').addEventListener('click', () => {
+            const cMax = parseInt(document.getElementById('max-co2').value);
+            const tMin = parseInt(document.getElementById('min-temp').value);
+            const tMax = parseInt(document.getElementById('max-temp').value);
+            const hMin = parseInt(document.getElementById('min-hum').value);
+            const hMax = parseInt(document.getElementById('max-hum').value);
+
+            // Якщо перевірка не пройдена - зупиняємо збереження
+            if (!this.validateSettings(cMax, tMin, tMax, hMin, hMax)) return;
+
             this.userSettings.co2.enabled = document.getElementById('check-co2').checked;
-            this.userSettings.co2.max = parseInt(document.getElementById('max-co2').value);
+            this.userSettings.co2.max = cMax;
             
             this.userSettings.temp.enabled = document.getElementById('check-temp').checked;
-            this.userSettings.temp.min = parseInt(document.getElementById('min-temp').value);
-            this.userSettings.temp.max = parseInt(document.getElementById('max-temp').value);
+            this.userSettings.temp.min = tMin;
+            this.userSettings.temp.max = tMax;
             
             this.userSettings.hum.enabled = document.getElementById('check-hum').checked;
-            this.userSettings.hum.min = parseInt(document.getElementById('min-hum').value);
-            this.userSettings.hum.max = parseInt(document.getElementById('max-hum').value);
+            this.userSettings.hum.min = hMin;
+            this.userSettings.hum.max = hMax;
 
             localStorage.setItem('climateSettingsAdvanced', JSON.stringify(this.userSettings));
             this.fetchData(); 
             
             const btn = document.getElementById('save-settings-btn');
-            btn.innerText = "Збережено!";
-            btn.style.backgroundColor = "#4caf50";
+            btn.innerText = "Збережено!"; btn.style.backgroundColor = "#4caf50";
             setTimeout(() => { btn.innerText = "Зберегти налаштування"; btn.style.backgroundColor = ""; }, 2000);
         });
 

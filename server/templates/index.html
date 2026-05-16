@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="dashboard-grid">
-    <!-- Ліва колонка: Картки та Графік -->
     <div class="dashboard-main-area">
         <div class="cards-wrapper">
             <div class="data-card co2-card">
@@ -27,20 +26,13 @@
         </div>
     </div>
 
-    <!-- Права колонка: Панель статусу та Налаштувань -->
     <aside class="dashboard-sidebar">
-        <!-- Блок статусу -->
         <div class="status-panel box-shadow mb-2">
             <h2 class="section-title">Статус системи</h2>
-            <div id="status-indicator" class="status-box">
-                Очікування даних...
-            </div>
-            <div class="update-meta">
-                Оновлено: <span id="last-update">--:--:--</span>
-            </div>
+            <div id="status-indicator" class="status-box">Очікування даних...</div>
+            <div class="update-meta">Оновлено: <span id="last-update">--:--:--</span></div>
         </div>
 
-        <!-- Дропдаун Налаштувань -->
         <div class="settings-panel box-shadow">
             <div class="settings-header" id="settings-toggle">
                 <h2 class="section-title" style="margin: 0; font-size: 1.1rem;">⚙️ Зона комфорту</h2>
@@ -50,24 +42,24 @@
             <div class="settings-content" id="settings-content" style="display: none;">
                 <div class="setting-group mt-2">
                     <label class="toggle-label"><input type="checkbox" id="check-co2"> CO2 (макс):</label>
-                    <div class="range-inputs"><input type="number" id="max-co2" class="form-control-sm"></div>
+                    <div class="range-inputs"><input type="number" id="max-co2" class="form-control-sm" min="400" max="5000"></div>
                 </div>
                 
                 <div class="setting-group">
                     <label class="toggle-label"><input type="checkbox" id="check-temp"> Температура:</label>
                     <div class="range-inputs">
-                        <input type="number" id="min-temp" class="form-control-sm" placeholder="Від">
+                        <input type="number" id="min-temp" class="form-control-sm" min="-5" max="50" placeholder="Від">
                         <span>-</span>
-                        <input type="number" id="max-temp" class="form-control-sm" placeholder="До">
+                        <input type="number" id="max-temp" class="form-control-sm" min="-5" max="50" placeholder="До">
                     </div>
                 </div>
                 
                 <div class="setting-group">
                     <label class="toggle-label"><input type="checkbox" id="check-hum"> Вологість:</label>
                     <div class="range-inputs">
-                        <input type="number" id="min-hum" class="form-control-sm" placeholder="Від">
+                        <input type="number" id="min-hum" class="form-control-sm" min="0" max="100" placeholder="Від">
                         <span>-</span>
-                        <input type="number" id="max-hum" class="form-control-sm" placeholder="До">
+                        <input type="number" id="max-hum" class="form-control-sm" min="0" max="100" placeholder="До">
                     </div>
                 </div>
                 
@@ -78,32 +70,30 @@
     </aside>
 </div>
 
-<!-- Модальне вікно (Попап) -->
 <div id="setup-modal" class="modal-overlay">
     <div class="modal-content">
         <h2 class="section-title text-center">🌿 Вітаємо в ClimateControl!</h2>
-        <p class="modal-text text-center">Це ваш перший вхід. Ваш часовий пояс визначено як:</p>
+        <p class="modal-text text-center">Ваш часовий пояс визначено як:</p>
         <div class="timezone-badge text-center mb-2"><span id="detected-timezone">Визначаємо...</span></div>
-        
         <p class="modal-text">Встановіть базові межі комфорту (їх завжди можна змінити у меню справа):</p>
         
         <div class="modal-quick-settings">
             <div class="input-group mb-2">
                 <label>Максимальний CO2 (ppm):</label>
-                <input type="number" id="modal-co2" value="1000" class="form-control">
+                <input type="number" id="modal-co2" value="1000" class="form-control" min="400" max="5000">
             </div>
             <div class="input-group mb-2">
                 <label>Комфортна температура (°C):</label>
                 <div style="display: flex; gap: 10px;">
-                    <input type="number" id="modal-temp-min" value="18" class="form-control" placeholder="Мін">
-                    <input type="number" id="modal-temp-max" value="24" class="form-control" placeholder="Макс">
+                    <input type="number" id="modal-temp-min" value="18" class="form-control" min="-5" max="50" placeholder="Мін">
+                    <input type="number" id="modal-temp-max" value="24" class="form-control" min="-5" max="50" placeholder="Макс">
                 </div>
             </div>
             <div class="input-group">
                 <label>Комфортна вологість (%):</label>
                 <div style="display: flex; gap: 10px;">
-                    <input type="number" id="modal-hum-min" value="40" class="form-control" placeholder="Мін">
-                    <input type="number" id="modal-hum-max" value="60" class="form-control" placeholder="Макс">
+                    <input type="number" id="modal-hum-min" value="40" class="form-control" min="0" max="100" placeholder="Мін">
+                    <input type="number" id="modal-hum-max" value="60" class="form-control" min="0" max="100" placeholder="Макс">
                 </div>
             </div>
         </div>

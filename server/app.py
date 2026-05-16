@@ -5,34 +5,30 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# 1. Налаштування
+# Налаштування
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///climate.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# 2. Модель даних
 class SensorData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow) # Зберігається завжди в UTC
     temp = db.Column(db.Float, nullable=False)
     hum = db.Column(db.Float, nullable=False)
     co2 = db.Column(db.Integer, nullable=False)
 
     def to_dict(self):
         return {
-            "id": self.id,
             "timestamp": self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
             "temp": self.temp,
             "hum": self.hum,
             "co2": self.co2
         }
 
-# 3. Ініціалізація БД
 with app.app_context():
     db.create_all()
 
-# 4. МАРШРУТИ ДЛЯ СТОРІНОК
 @app.route('/')
 def home():
     return "<h1>Сервер працює!</h1><p><a href='/dashboard'>Дашборд</a></p>"
@@ -45,7 +41,6 @@ def dashboard():
 def statistics():
     return render_template('statistics.html')
 
-# 5. API МАРШРУТИ (Для роботи датчиків та JS)
 @app.route('/update', methods=['POST'])
 def update_data():
     data = request.get_json()
@@ -62,33 +57,33 @@ def update_data():
 
 @app.route('/data')
 def get_data():
-    # Віддає останні 20 записів для головного графіка
     history = SensorData.query.order_by(SensorData.timestamp.desc()).limit(20).all()
     return jsonify([entry.to_dict() for entry in reversed(history)])
 
+# ОНОВЛЕНИЙ МАРШРУТ АНАЛІТИКИ
 @app.route('/api/history')
 def get_history():
-    # Новий маршрут для сторінки статистики (рахує середнє значення за годину)
-    date_str = request.args.get('date')
-    param = request.args.get('param')
+    start_utc_str = request.args.get('start')
+    end_utc_str = request.args.get('end')
     
-    if not date_str or not param:
+    if not start_utc_str or not end_utc_str:
         return jsonify({"error": "Missing parameters"}), 400
 
     try:
-        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        # Конвертуємо отримані рядки з JS у об'єкти datetime
+        start_dt = datetime.strptime(start_utc_str[:19], '%Y-%m-%dT%H:%M:%S')
+        end_dt = datetime.strptime(end_utc_str[:19], '%Y-%m-%dT%H:%M:%S')
     except ValueError:
         return jsonify({"error": "Invalid date format"}), 400
 
-    # Групуємо записи по годинах і рахуємо середнє значення (для плавності графіка)
-    results = db.session.query(
-        func.strftime('%H', SensorData.timestamp).label('hour'),
-        func.avg(getattr(SensorData, param)).label('value')
-    ).filter(func.date(SensorData.timestamp) == target_date)\
-     .group_by('hour').all()
+    # Забираємо всі записи в межах потрібного дня (в розрізі UTC)
+    records = SensorData.query.filter(
+        SensorData.timestamp >= start_dt,
+        SensorData.timestamp < end_dt
+    ).order_by(SensorData.timestamp.asc()).all()
 
-    history_data = [{"hour": f"{r.hour}:00", "value": round(r.value, 2)} for r in results]
-    return jsonify(history_data)
+    return jsonify([r.to_dict() for r in records])
 
 if __name__ == '__main__':
+    # Слухаємо всю Wi-Fi мережу
     app.run(debug=True, host='0.0.0.0', port=5000)

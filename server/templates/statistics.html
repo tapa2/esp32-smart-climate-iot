@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/uk.js"></script>
+
 <div class="statistics-wrapper">
     <div class="controls-panel box-shadow">
         <h2 class="section-title">Аналіз архівних даних</h2>
         <div class="filter-controls">
             <div class="input-group">
                 <label for="date-picker">Оберіть дату:</label>
-                <input type="date" id="date-picker" class="form-control">
+                <input type="text" id="date-picker" class="form-control" placeholder="Завантаження календаря...">
             </div>
             <div class="input-group">
                 <label for="param-picker">Параметр:</label>
@@ -23,10 +27,11 @@
 
     <div class="chart-container box-shadow mt-2">
         <h2 id="history-chart-title" class="section-title text-center">Графік за обраний період</h2>
-        <canvas id="historyChart"></canvas>
+        <div class="canvas-wrapper">
+            <canvas id="historyChart"></canvas>
+        </div>
     </div>
 </div>
 
-<!-- Підключення JS тільки для цієї сторінки -->
 <script src="{{ url_for('static', filename='js/stats.js') }}"></script>
 {% endblock %}
