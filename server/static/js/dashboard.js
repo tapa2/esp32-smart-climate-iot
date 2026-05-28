@@ -1,8 +1,8 @@
 class DashboardManager {
     constructor() {
-        this.updateInterval = 300000; 
+        this.updateInterval = 300000;
         this.chart = null;
-        
+
         this.defaultSettings = {
             co2: { enabled: true, max: 1000 },
             temp: { enabled: true, min: 18, max: 24 },
@@ -15,8 +15,8 @@ class DashboardManager {
         this.initChart();
         this.bindEvents();
         this.checkFirstSetup();
-        this.fetchData(); 
-        
+        this.fetchData();
+
         setInterval(() => this.fetchData(), this.updateInterval);
     }
 
@@ -29,18 +29,18 @@ class DashboardManager {
     validateSettings(co2Max, tMin, tMax, hMin, hMax) {
         if (tMin > tMax) { alert("Помилка: Мінімальна температура не може бути більшою за максимальну!"); return false; }
         if (tMin < -5 || tMax > 50) { alert("Помилка: Допустима температура від -5 до 50 °C!"); return false; }
-        
+
         if (hMin > hMax) { alert("Помилка: Мінімальна вологість не може бути більшою за максимальну!"); return false; }
         if (hMin < 0 || hMax > 100) { alert("Помилка: Вологість має бути в межах 0 - 100%!"); return false; }
-        
+
         if (co2Max < 400 || co2Max > 5000) { alert("Помилка: Адекватний рівень CO2 знаходиться в межах 400 - 5000 ppm!"); return false; }
-        
+
         return true;
     }
 
     checkFirstSetup() {
         const isSetupDone = localStorage.getItem('climateSetupComplete');
-        
+
         if (!isSetupDone) {
             const modal = document.getElementById('setup-modal');
             const tzDisplay = document.getElementById('detected-timezone');
@@ -53,8 +53,7 @@ class DashboardManager {
                 const tMax = parseInt(document.getElementById('modal-temp-max').value);
                 const hMin = parseInt(document.getElementById('modal-hum-min').value);
                 const hMax = parseInt(document.getElementById('modal-hum-max').value);
-                
-                // Якщо перевірка не пройдена - зупиняємо збереження
+
                 if (!this.validateSettings(cMax, tMin, tMax, hMin, hMax)) return;
 
                 this.userSettings.co2.max = cMax;
@@ -62,12 +61,12 @@ class DashboardManager {
                 this.userSettings.temp.max = tMax;
                 this.userSettings.hum.min = hMin;
                 this.userSettings.hum.max = hMax;
-                
+
                 localStorage.setItem('climateSettingsAdvanced', JSON.stringify(this.userSettings));
                 localStorage.setItem('climateSetupComplete', 'true');
-                
+
                 this.updateInputsFromSettings();
-                this.fetchData(); 
+                this.fetchData();
                 modal.classList.remove('active');
             });
         }
@@ -82,11 +81,11 @@ class DashboardManager {
     updateInputsFromSettings() {
         document.getElementById('check-co2').checked = this.userSettings.co2.enabled;
         document.getElementById('max-co2').value = this.userSettings.co2.max;
-        
+
         document.getElementById('check-temp').checked = this.userSettings.temp.enabled;
         document.getElementById('min-temp').value = this.userSettings.temp.min;
         document.getElementById('max-temp').value = this.userSettings.temp.max;
-        
+
         document.getElementById('check-hum').checked = this.userSettings.hum.enabled;
         document.getElementById('min-hum').value = this.userSettings.hum.min;
         document.getElementById('max-hum').value = this.userSettings.hum.max;
@@ -110,23 +109,22 @@ class DashboardManager {
             const hMin = parseInt(document.getElementById('min-hum').value);
             const hMax = parseInt(document.getElementById('max-hum').value);
 
-            // Якщо перевірка не пройдена - зупиняємо збереження
             if (!this.validateSettings(cMax, tMin, tMax, hMin, hMax)) return;
 
             this.userSettings.co2.enabled = document.getElementById('check-co2').checked;
             this.userSettings.co2.max = cMax;
-            
+
             this.userSettings.temp.enabled = document.getElementById('check-temp').checked;
             this.userSettings.temp.min = tMin;
             this.userSettings.temp.max = tMax;
-            
+
             this.userSettings.hum.enabled = document.getElementById('check-hum').checked;
             this.userSettings.hum.min = hMin;
             this.userSettings.hum.max = hMax;
 
             localStorage.setItem('climateSettingsAdvanced', JSON.stringify(this.userSettings));
-            this.fetchData(); 
-            
+            this.fetchData();
+
             const btn = document.getElementById('save-settings-btn');
             btn.innerText = "Збережено!"; btn.style.backgroundColor = "#4caf50";
             setTimeout(() => { btn.innerText = "Зберегти налаштування"; btn.style.backgroundColor = ""; }, 2000);
@@ -159,6 +157,72 @@ class DashboardManager {
         } catch (error) { console.error("Помилка:", error); }
     }
 
+    iaqLabel(iaq) {
+        if (iaq === undefined || iaq === null) return '--';
+        if (iaq >= 80) return 'Чудовий';
+        if (iaq >= 60) return 'Добрий';
+        if (iaq >= 40) return 'Помірний';
+        if (iaq >= 20) return 'Поганий';
+        return 'Небезпечний';
+    }
+
+    iaqColor(iaq) {
+        if (iaq === undefined || iaq === null) return 'var(--text-muted)';
+        if (iaq >= 80) return '#4caf50';
+        if (iaq >= 60) return '#8bc34a';
+        if (iaq >= 40) return '#ffc107';
+        if (iaq >= 20) return '#ff9800';
+        return '#f44336';
+    }
+
+    linearRegression(historyData) {
+        const n = Math.min(historyData.length, 6);
+        if (n < 3) return null;
+        const points = historyData.slice(-n);
+
+        const t0 = new Date(points[0].timestamp.replace(' ', 'T') + 'Z').getTime();
+        const xs = [], ys = [];
+        for (const p of points) {
+            const t = new Date(p.timestamp.replace(' ', 'T') + 'Z').getTime();
+            xs.push((t - t0) / 60000);
+            ys.push(p.co2);
+        }
+        const sx  = xs.reduce((a, b) => a + b, 0);
+        const sy  = ys.reduce((a, b) => a + b, 0);
+        const sxx = xs.reduce((a, b) => a + b * b, 0);
+        const sxy = xs.reduce((a, b, i) => a + b * ys[i], 0);
+        const meanX = sx / n;
+        const meanY = sy / n;
+        const denom = sxx - n * meanX * meanX;
+        if (Math.abs(denom) < 1e-9) return null;
+        const slope = (sxy - n * meanX * meanY) / denom;
+        const intercept = meanY - slope * meanX;
+        return { slope, intercept, lastX: xs[xs.length - 1], lastY: ys[ys.length - 1] };
+    }
+
+    forecastCo2(historyData) {
+        const reg = this.linearRegression(historyData);
+        if (!reg) return null;
+        if (reg.slope < 1.0) return null;
+        const target = this.userSettings.co2.enabled ? this.userSettings.co2.max : 1000;
+        if (reg.lastY >= target) return null;
+        const minutesToTarget = (target - reg.intercept) / reg.slope - reg.lastX;
+        if (minutesToTarget <= 0 || minutesToTarget > 180) return null;
+        return { minutes: Math.round(minutesToTarget), target };
+    }
+
+    updateForecast(historyData) {
+        const box = document.getElementById('forecast-indicator');
+        if (!box) return;
+        const f = this.forecastCo2(historyData);
+        if (f) {
+            box.innerText = `📈 Прогноз: CO₂ досягне ${f.target} ppm приблизно через ${f.minutes} хв. Заздалегідь провітріть.`;
+            box.style.display = 'block';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
     updateUI(historyData) {
         const latest = historyData[historyData.length - 1];
 
@@ -167,7 +231,17 @@ class DashboardManager {
         document.getElementById('hum-val').innerText = latest.hum;
         document.getElementById('last-update').innerText = this.formatLocalTime(latest.timestamp);
 
+        const iaq = latest.iaq;
+        const iaqValEl = document.getElementById('iaq-val');
+        const iaqLabelEl = document.getElementById('iaq-label');
+        if (iaqValEl) {
+            iaqValEl.innerText = (iaq === undefined || iaq === null) ? '--' : iaq;
+            iaqValEl.style.color = this.iaqColor(iaq);
+        }
+        if (iaqLabelEl) iaqLabelEl.innerText = this.iaqLabel(iaq);
+
         this.updateStatus(historyData);
+        this.updateForecast(historyData);
 
         this.chart.data.labels = historyData.map(d => this.formatLocalTime(d.timestamp));
         this.chart.data.datasets[0].data = historyData.map(d => d.co2);
@@ -177,15 +251,15 @@ class DashboardManager {
     updateStatus(historyData) {
         const statusBox = document.getElementById('status-indicator');
         const recentPoints = historyData.slice(-3);
-        let penaltyScore = 0; 
+        let penaltyScore = 0;
         let latestAdvice = "Мікроклімат у вашій зоні комфорту.";
-        
+
         recentPoints.forEach((data, index) => {
             let isPointBad = false;
             if (this.userSettings.co2.enabled && data.co2 > this.userSettings.co2.max) {
                 isPointBad = true;
                 if (index === recentPoints.length - 1) latestAdvice = `Рівень CO2 підвищується (${data.co2} ppm). Бажано провітрити.`;
-            } 
+            }
             if (this.userSettings.temp.enabled) {
                 if (data.temp < this.userSettings.temp.min) {
                     isPointBad = true;
@@ -217,7 +291,7 @@ class DashboardManager {
             statusBox.style.backgroundColor = "rgba(255, 152, 0, 0.1)"; statusBox.style.borderColor = "#ff9800"; statusBox.style.color = "#ffcc80";
         } else if (penaltyScore >= 3) {
             statusBox.style.backgroundColor = "rgba(244, 67, 54, 0.15)"; statusBox.style.borderColor = "#f44336"; statusBox.style.color = "#ffcdd2";
-            statusBox.innerText = "КРИТИЧНО: " + latestAdvice; 
+            statusBox.innerText = "КРИТИЧНО: " + latestAdvice;
         }
     }
 }

@@ -16,6 +16,10 @@
                 <div class="card-title">Вологість</div>
                 <div class="card-value"><span id="hum-val">--</span> <span class="unit">%</span></div>
             </div>
+            <div class="data-card iaq-card">
+                <div class="card-title">IAQ (Indoor Air Quality)</div>
+                <div class="card-value"><span id="iaq-val">--</span> <span class="unit" id="iaq-label">--</span></div>
+            </div>
         </div>
 
         <div class="chart-container box-shadow">
@@ -30,6 +34,7 @@
         <div class="status-panel box-shadow mb-2">
             <h2 class="section-title">Статус системи</h2>
             <div id="status-indicator" class="status-box">Очікування даних...</div>
+            <div id="forecast-indicator" class="status-box forecast-box" style="display:none;"></div>
             <div class="update-meta">Оновлено: <span id="last-update">--:--:--</span></div>
         </div>
 
@@ -38,13 +43,13 @@
                 <h2 class="section-title" style="margin: 0; font-size: 1.1rem;">⚙️ Зона комфорту</h2>
                 <span id="settings-arrow" class="dropdown-arrow">▼</span>
             </div>
-            
+
             <div class="settings-content" id="settings-content" style="display: none;">
                 <div class="setting-group mt-2">
                     <label class="toggle-label"><input type="checkbox" id="check-co2"> CO2 (макс):</label>
                     <div class="range-inputs"><input type="number" id="max-co2" class="form-control-sm" min="400" max="5000"></div>
                 </div>
-                
+
                 <div class="setting-group">
                     <label class="toggle-label"><input type="checkbox" id="check-temp"> Температура:</label>
                     <div class="range-inputs">
@@ -53,7 +58,7 @@
                         <input type="number" id="max-temp" class="form-control-sm" min="-5" max="50" placeholder="До">
                     </div>
                 </div>
-                
+
                 <div class="setting-group">
                     <label class="toggle-label"><input type="checkbox" id="check-hum"> Вологість:</label>
                     <div class="range-inputs">
@@ -62,7 +67,7 @@
                         <input type="number" id="max-hum" class="form-control-sm" min="0" max="100" placeholder="До">
                     </div>
                 </div>
-                
+
                 <button id="save-settings-btn" class="btn-primary mt-2">Зберегти налаштування</button>
                 <button id="reset-settings-btn" class="btn-text">Відновити рекомендовані</button>
             </div>
@@ -76,7 +81,7 @@
         <p class="modal-text text-center">Ваш часовий пояс визначено як:</p>
         <div class="timezone-badge text-center mb-2"><span id="detected-timezone">Визначаємо...</span></div>
         <p class="modal-text">Встановіть базові межі комфорту (їх завжди можна змінити у меню справа):</p>
-        
+
         <div class="modal-quick-settings">
             <div class="input-group mb-2">
                 <label>Максимальний CO2 (ppm):</label>

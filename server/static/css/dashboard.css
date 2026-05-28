@@ -7,6 +7,7 @@
 .co2-card { border-left-color: var(--accent-blue); }
 .temp-card { border-left-color: var(--accent-red); }
 .hum-card { border-left-color: var(--accent-green); }
+.iaq-card { border-left-color: #9c27b0; }
 .card-title { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; }
 .card-value { font-size: 2rem; font-weight: bold; }
 .unit { font-size: 1rem; color: var(--text-muted); font-weight: normal; }
@@ -22,6 +23,12 @@
     font-weight: 500; line-height: 1.5;
     background-color: rgba(76, 175, 80, 0.1); border-left: 4px solid #4caf50; color: #e0e0e0;
     transition: background-color 0.8s ease, border-color 0.8s ease, color 0.8s ease;
+}
+.forecast-box {
+    background-color: rgba(33, 150, 243, 0.1);
+    border-left: 4px solid var(--accent-blue);
+    color: #bbdefb;
+    font-size: 0.95rem;
 }
 .update-meta { font-size: 0.85rem; color: var(--text-muted); text-align: right; }
 

@@ -19,9 +19,16 @@
                     <option value="co2">Рівень CO2</option>
                     <option value="temp">Температура</option>
                     <option value="hum">Вологість</option>
+                    <option value="iaq">IAQ (якість повітря)</option>
                 </select>
             </div>
             <button id="load-history-btn" class="btn-primary">Завантажити графік</button>
+        </div>
+
+        <div class="export-controls">
+            <span class="export-label">Експорт обраного дня:</span>
+            <button id="export-csv-btn" class="btn-secondary" disabled>⬇ CSV</button>
+            <button id="export-json-btn" class="btn-secondary" disabled>⬇ JSON</button>
         </div>
     </div>
 
