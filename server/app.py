@@ -7,7 +7,7 @@ from sqlalchemy import text
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///climate.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///climate.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 DEVICE_TOKEN = os.environ.get("DEVICE_TOKEN", "esp32-climate-secret-2026")
